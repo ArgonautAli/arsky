@@ -1,4 +1,4 @@
-#! /usr/bin/env node
+#!/usr/bin/env node
 const yargs = require("yargs");
 const chalk = require("chalk");
 const axios = require("axios");
@@ -6,11 +6,7 @@ const sharp = require("sharp");
 const boxen = require("boxen");
 
 const pathMap = {
-  a: "ab",
-  b: "ab",
-  c: "c",
-  s: "s",
-  t: "t",
+  a: "ab", b: "ab", c: "c", s: "s", t: "t",
 };
 
 const defaultPaths = ["def", "ghi", "jkl", "mno", "pqr", "uvw", "xyz"];
@@ -27,175 +23,119 @@ const asciiArtHeader = `
 `;
 
 const usage = chalk.keyword("violet")(
-  "\n\n" +
-    boxen(
-      chalk.green(
-        "\n" + "Get ASCII art or create new one from terminal" + "\n"
-      ),
-      { padding: 1, borderColor: "green", dimBorder: true }
-    ) +
-    "\n"
+  `\n\n${boxen(chalk.green("\nGet ASCII art or create new one from terminal\n"), {
+    padding: 1,
+    borderColor: "green",
+    dimBorder: true
+  })}\n`
 );
 
-const options = yargs
+const argv = yargs
   .usage(usage)
-  .option("-g", {
+  .option("g", {
     alias: "get",
     describe: "Input text to get art",
     type: "string",
-    demandOption: false,
   })
-  .option("-c", {
+  .option("c", {
     alias: "create",
     describe: "Input path to create art",
     type: "string",
-    demandOption: false,
   })
-  .option("-s", {
+  .option("s", {
     alias: "search",
     describe: "Input text to search & generate art",
     type: "string",
-    demandOption: false,
   })
-  .help(true).argv;
-
-const argv = require("yargs/yargs")(process.argv).argv;
+  .help()
+  .argv;
 
 function showHelp() {
   console.log(asciiArtHeader);
   console.log(usage);
-  console.log("\nOptions:\r");
-  console.log(
-    `\t--version\t  Show version number                 \t[boolean]\r`
-  );
-  console.log(
-    `\t-g, --get\t  Get ASCII image from the web        \t[string]\r`
-  );
-  console.log(
-    `\t-c, --create\t  Create new from your image path      \t[string]\r`
-  );
-  console.log(
-    `\t-s, --search\t  Search & generate ASCII image from google\t[string]\r`
-  );
-  console.log(
-    `\t--help\t\t  Show help.                          \t[boolean]\n`
-  );
+  console.log("\nOptions:");
+  console.log("  --version     Show version number                 [boolean]");
+  console.log("  -g, --get     Get ASCII image from the web        [string]");
+  console.log("  -c, --create  Create new from your image path     [string]");
+  console.log("  -s, --search  Search & generate ASCII image from google [string]");
+  console.log("  --help        Show help                           [boolean]");
 }
 
 const getUrlPath = (input) => {
   const firstLetter = input.charAt(0).toLowerCase();
-
-  if (pathMap[firstLetter]) {
-    return pathMap[firstLetter];
-  }
-
-  for (const path of defaultPaths) {
-    if (path.includes(firstLetter)) {
-      return path;
-    }
-  }
-
-  return "";
+  return pathMap[firstLetter] || defaultPaths.find(path => path.includes(firstLetter)) || "";
 };
 
 async function getAscii(input) {
   const path = getUrlPath(input);
   const url = `http://ascii-art.de/ascii/${path}/${input}.txt`;
-  await axios
-    .get(url)
-    .then((response) => {
-      const html = response.data;
-      console.log(html);
-      if (html) {
-        console.log(asciiArt);
-      } else {
-        console.log(
-          "No ASCII art found in the specified text. Do you want to create your own?"
-        );
-      }
-    })
-    .catch((error) => {
-      // console.error('Error fetching art!');
-    });
+  try {
+    const response = await axios.get(url);
+    console.log(response.data);
+  } catch (error) {
+    console.error('Error fetching ASCII art:', error.message);
+    console.log("No ASCII art found. Do you want to create your own?");
+  }
 }
+
 async function generateAsciiArt(imagePath, maxWidth = 90) {
   try {
-    // This will resize the image and convert it to grayscale and then to raw which converts it to pixel value buffer from 0 to 255
     const { data, info } = await sharp(imagePath)
-      .resize({ width: maxWidth, withoutEnlargement: true }) // Maintain aspect ratio
+      .resize({ width: maxWidth, withoutEnlargement: true })
       .greyscale()
       .raw()
       .toBuffer({ resolveWithObject: true });
 
     const { width, height } = info;
-
-    const characters =
-      " .`'^\",:;Il!i<>~+_-?][}{1()|/ftjxrnuvcXzYUJCLQ0OZmwpqbdkhao*#MW&8%B@$";
+    const characters = " .`'^\",:;Il!i<>~+_-?][}{1()|/ftjxrnuvcXzYUJCLQ0OZmwpqbdkhao*#MW&8%B@$";
     const numChars = characters.length - 1;
 
     let asciiArt = "";
 
-    // Iterate through each pixel row
     for (let y = 0; y < height; y += 2) {
-      // Adjusting y to compress vertically
-      // Iterate through each pixel column
       for (let x = 0; x < width; x++) {
-        // Calculate the index of the pixel in the raw data buffer to make it 2d
         const pixelIndex = y * width + x;
-
-        // Get grayscale pixel value (0-255) from converted buffer
         const pixelBrightness = data[pixelIndex];
-
-        // Calculate corresponding character from list based on pixel brightness
         const charIndex = Math.floor((pixelBrightness / 255) * numChars);
-
         asciiArt += characters[charIndex];
       }
-      asciiArt += "\n"; // Newline after each row
+      asciiArt += "\n";
     }
 
-    // Output the ASCII art to console
     console.log(asciiArt);
   } catch (err) {
-    console.error("Error generating ASCII art:", err);
+    console.error("Error generating ASCII art:", err.message);
   }
 }
 
 async function searchKeyWord(keyword) {
-  const url = `https://www.google.com/search?q=${keyword}&gl=us&hl=en`;
-  let headers = {
-    "User-Agent":
-      "Mozilla/5.0 (Windows NT 6.3; Win64; x64)   AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36 Viewer/96.9.4688.89",
+  const url = `https://www.google.com/search?q=${encodeURIComponent(keyword)}&gl=us&hl=en`;
+  const headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
   };
-  axios
-    .get(url, headers)
-    .then((res) => console.log(res))
-    .catch((err) => console.log(err));
+  try {
+    const response = await axios.get(url, { headers });
+    console.log("Search results:", response.data);
+  } catch (error) {
+    console.error("Error searching:", error.message);
+  }
 }
 
 async function main() {
-  var text = yargs.argv.g || yargs.argv.get;
-  var imgPath = yargs.argv.c || yargs.argv.create;
-  var searchKey = yargs.argv.s || yargs.argv.search;
+  const { g: text, c: imgPath, s: searchKey } = argv;
 
-  if (text == null && imgPath == null && searchKey == null) {
+  if (!text && !imgPath && !searchKey) {
     showHelp();
     return;
   }
 
-  if (text !== null && text !== undefined) {
+  if (text) {
     await getAscii(text);
-    return;
-  }
-
-  if (imgPath !== null && imgPath !== undefined) {
-    generateAsciiArt(imgPath, 90);
-    return;
-  }
-  if (searchKey !== null && searchKey !== undefined) {
-    searchKeyWord(searchKey);
-    return;
+  } else if (imgPath) {
+    await generateAsciiArt(imgPath, 90);
+  } else if (searchKey) {
+    await searchKeyWord(searchKey);
   }
 }
 
-main();
+main().catch(console.error);
