@@ -19,12 +19,21 @@ module.exports = {
   rules: {
     'prettier/prettier': 'error',
   },
-  ignorePatterns: ['dist/**/*', '*.js'],
+  ignorePatterns: ['dist/**/*'],
   overrides: [
     {
       files: ['tests/**/*.ts'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'off',
+      },
+    },
+    {
+      files: ['commitlint.config.js'],
+      env: {
+        node: true,
+      },
+      rules: {
+        '@typescript-eslint/no-var-requires': 'off',
       },
     },
   ],

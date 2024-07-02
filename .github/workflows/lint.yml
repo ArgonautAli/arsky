@@ -20,30 +20,27 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-node-
+
       - name: Install dependencies
-        run: |
-          npm ci
-          npm install -g prettier eslint stylelint
+        run: npm ci
 
-      - name: Super-Linter
-        uses: github/super-linter@v6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VALIDATE_ALL_CODEBASE: false
-          DEFAULT_BRANCH: main
-          VALIDATE_JAVASCRIPT_ES: true
-          VALIDATE_TYPESCRIPT_ES: true
-          VALIDATE_CSS: true
-          VALIDATE_HTML: true
-          VALIDATE_YAML: true
-          VALIDATE_JSON: true
-          VALIDATE_MARKDOWN: true
-
-      - name: Run ESLint
-        run: npx eslint '**/*.{js,jsx,ts,tsx}' --max-warnings=0
-
-      - name: Run Prettier
-        run: npx prettier --check '**/*.{js,jsx,ts,tsx,css,md,yml,yaml,json}'
+      - name: Run linters
+        uses: wearerequired/lint-action@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          eslint: true
+          prettier: true
+          auto_fix: true
+          eslint_extensions: js,jsx,ts,tsx
+          prettier_extensions: js,jsx,ts,tsx,css,md,yml,yaml,json
+          commit_message: "style: fix code style issues with Prettier"
 
       - name: Check for trailing whitespace and newlines
         run: |
