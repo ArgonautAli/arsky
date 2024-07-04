@@ -7,6 +7,7 @@ import { getAscii } from './services/asciiArtService';
 import { generateAsciiArt } from './services/imageService';
 import logger from './utils/logger';
 import { ASCII_ART_HEADER } from './config/constants';
+import { searchAscii } from './services/imageSearchService';
 
 const program = new Command();
 
@@ -23,6 +24,7 @@ program
   .description('A CLI tool to fetch ASCII art or create your own from imagepath')
   .option('-g, --get <text>', 'Input text to get art')
   .option('-c, --create <path>', 'Input path to create art')
+  .option('-s, --search <text>', 'Input text to create art')
   .addHelpText('before', ASCII_ART_HEADER)
   .addHelpText('after', usage);
 
@@ -37,6 +39,9 @@ async function main() {
       console.log(art);
     } else if (options.create) {
       const art = await generateAsciiArt(options.create);
+      console.log(art);
+    } else if (options.search) {
+      const art = await searchAscii(options.search);
       console.log(art);
     } else {
       program.help();
