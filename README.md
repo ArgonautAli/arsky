@@ -51,12 +51,13 @@ ArSky can be used with the following options:
 
 - `-g, --get <text>`: Input text to get ASCII art
 - `-c, --create <path>`: Input path to an image file to create ASCII art
+- `-s, --search <text>`: Input text to create ASCII art from Google image search results
 - `-v, --version`: Display the current version of ArSky
 - `-h, --help`: Display help information
 
 ### Examples
 
-Fetch ASCII art for a word:
+Fetch ASCII art for a word from archives:
 
 ```sh
 arsky -g coffee
@@ -66,6 +67,12 @@ Create ASCII art from an image:
 
 ```sh
 arsky -c path/to/your/image.png
+```
+
+Create ASCII art from a random image using Google image search:
+
+```sh
+arsky -s "michael scott"
 ```
 
 For more options and detailed usage instructions:

@@ -24,7 +24,7 @@ program
   .description('A CLI tool to fetch ASCII art or create your own from imagepath')
   .option('-g, --get <text>', 'Input text to get art')
   .option('-c, --create <path>', 'Input path to create art')
-  .option('-s, --search <text>', 'Input text to create art')
+  .option('-s, --search <text>', 'Input text to create ASCII art from Google image search results')
   .addHelpText('before', ASCII_ART_HEADER)
   .addHelpText('after', usage);
 
