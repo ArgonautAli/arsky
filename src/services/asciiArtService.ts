@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { ASCII_ART_URL } from '../config/constants';
 import { getUrlPath } from '../utils/helpers';
-import logger from '../utils/logger';
+// import logger from '../utils/logger';
 
 export async function getAscii(input: string): Promise<string> {
   const path = getUrlPath(input);
@@ -10,7 +10,6 @@ export async function getAscii(input: string): Promise<string> {
     const response = await axios.get<string>(url);
     return response.data;
   } catch (error) {
-    logger.error('Error fetching art:', error);
     throw new Error('Failed to fetch ASCII art');
   }
 }

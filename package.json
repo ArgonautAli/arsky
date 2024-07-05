@@ -1,6 +1,6 @@
 {
   "name": "arsky",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "A CLI tool to fetch ASCII art or create your own from imagepath",
   "main": "dist/index.js",
   "bin": {
@@ -30,6 +30,7 @@
     "axios": "^1.7.2",
     "boxen": "^5.1.2",
     "chalk": "^4.1.2",
+    "cheerio": "^1.0.0-rc.12",
     "commander": "^12.1.0",
     "sharp": "^0.33.4",
     "winston": "^3.11.0"
